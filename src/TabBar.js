@@ -41,6 +41,7 @@ type Props<T> = SceneRendererProps<T> & {
   tabStyle?: ViewStyleProp,
   indicatorStyle?: ViewStyleProp,
   labelStyle?: TextStyleProp,
+  activeLabelStyle?: TextStyleProp,
   style?: ViewStyleProp,
 };
 
@@ -201,7 +202,7 @@ export default class TabBar<T: *> extends React.Component<Props<T>, State> {
     this._adjustScroll(value);
   };
 
-  _renderLabel = (scene: Scene<*>) => {
+  _renderLabel = (scene: Scene<*>, isFocused: bool) => {
     if (typeof this.props.renderLabel !== 'undefined') {
       return this.props.renderLabel(scene);
     }
@@ -218,7 +219,7 @@ export default class TabBar<T: *> extends React.Component<Props<T>, State> {
     return (
       <Animated.Text
         {...numberOfLinesProp}
-        style={[styles.tabLabel, this.props.labelStyle]}
+        style={[styles.tabLabel, this.props.labelStyle, isFocused ? this.props.activeLabelStyle : null]}
       >
         {label}
       </Animated.Text>
@@ -602,7 +603,10 @@ export default class TabBar<T: *> extends React.Component<Props<T>, State> {
                   outputRange,
                 })
               );
-              const label = this._renderLabel({ route });
+
+              const isFocused = i === navigationState.index;
+
+              const label = this._renderLabel({ route }, isFocused);
               const icon = this.props.renderIcon
                 ? this.props.renderIcon({ route })
                 : null;
@@ -653,8 +657,6 @@ export default class TabBar<T: *> extends React.Component<Props<T>, State> {
                 typeof accessibilityLabel !== 'undefined'
                   ? accessibilityLabel
                   : this.props.getLabelText({ route });
-
-              const isFocused = i === navigationState.index;
 
               const onLayoutProp = {};
               if (this.props.dynamicWidth) {
